@@ -67,26 +67,17 @@ async function bootstrap(): Promise<void> {
     await api.register(usersRoutes)
   }, { prefix: '/api' })
 
-  // Also register routes without prefix for backward compatibility
-  await app.register(authRoutes)
-  await app.register(accountsRoutes)
-  await app.register(pixRoutes)
-  await app.register(transactionsRoutes)
-  await app.register(cardsRoutes)
-  await app.register(paymentsRoutes)
-  await app.register(usersRoutes)
-
   // Serve frontend static files in production
   const webDistPath = path.join(__dirname, '..', '..', 'web', 'dist')
   await app.register(fastifyStatic, {
     root: webDistPath,
     prefix: '/',
-    decorateReply: false,
+    wildcard: false,
   })
 
   // SPA fallback: serve index.html for non-API routes
   app.setNotFoundHandler(async (request, reply) => {
-    if (request.url.startsWith('/api/')) {
+    if (request.url.startsWith('/api/') || request.url.startsWith('/auth/') || request.url.startsWith('/accounts/') || request.url.startsWith('/pix/') || request.url.startsWith('/transactions/') || request.url.startsWith('/cards/') || request.url.startsWith('/payments/') || request.url.startsWith('/users/') || request.url.startsWith('/health')) {
       return reply.status(404).send({ code: 'NOT_FOUND', message: 'Rota não encontrada' })
     }
     return reply.sendFile('index.html')

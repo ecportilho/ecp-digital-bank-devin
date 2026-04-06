@@ -30,7 +30,15 @@ export async function api<T>(endpoint: string, options: ApiOptions = {}): Promis
     headers['Authorization'] = `Bearer ${token}`
   }
 
-  const url = API_URL ? `${API_URL}${endpoint}` : `/api${endpoint}`
+  let baseUrl = API_URL
+  if (!baseUrl) {
+    // Strip any embedded credentials from the URL (e.g. basic auth tunnels)
+    const loc = new URL(window.location.href)
+    loc.username = ''
+    loc.password = ''
+    baseUrl = loc.origin
+  }
+  const url = `${baseUrl}/api${endpoint}`
 
   const response = await fetch(url, {
     method,
